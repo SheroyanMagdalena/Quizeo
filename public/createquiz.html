@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz - Quizeo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header with navigation links -->
+    <header>
+        <div class="logo">
+            <a href="quiz.html"><h1>Quizeo</h1></a>
+        </div>
+        <nav class="header-nav">
+            <a href="quiz.html">Quizzes</a>
+            <a href="myquiz.html">My Quizzes</a>
+            <a href="#review">Review</a>
+            <a href="userProfile.html">My Profile</a>
+            <a href="index.html">Log Out</a>
+        </nav>
+    </header>
+
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <h1>Create a New Quiz</h1>
+        <section id="create-quiz">
+            <form id="quizForm" class="quiz-form">
+                <div class="form-group">
+                    <label for="title">Quiz Title:</label>
+                    <input type="text" id="title" name="title" placeholder="Enter quiz title" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <input type="text" id="category" name="category" placeholder="Enter category (e.g., Math, Science)" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="difficulty">Difficulty Level:</label>
+                    <select id="difficulty" name="difficulty" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+
+                <div id="questionContainer">
+                    <h3>Questions:</h3>
+                    <div class="question">
+                        <textarea name="questionText" placeholder="Enter question text" required></textarea>
+                        <div class="options">
+                            <input type="text" name="option1" placeholder="Option 1" required />
+                            <input type="text" name="option2" placeholder="Option 2" required />
+                            <input type="text" name="option3" placeholder="Option 3" required />
+                            <input type="text" name="option4" placeholder="Option 4" required />
+                        </div>
+                        <div class="correct-option">
+                            <label>Correct Option:</label>
+                            <select name="correctOption" required>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                                <option value="3">Option 3</option>
+                                <option value="4">Option 4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="addQuestion" class="btn">Add Another Question</button>
+
+                <div class="form-group">
+                    <label for="timeLimit">Time Limit (in minutes):</label>
+                    <input type="number" id="timeLimit" name="timeLimit" min="1" placeholder="Enter time limit" required />
+                </div>
+
+                <button type="submit" class="btn submit-btn">Create Quiz</button>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('quizForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Gather form data
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const timeLimit = document.getElementById('timeLimit').value;
+
+            // Gather questions
+            const questions = [];
+            const questionElements = document.querySelectorAll('.question');
+
+            questionElements.forEach(questionElement => {
+                const questionText = questionElement.querySelector('textarea[name="questionText"]').value;
+                const option1 = questionElement.querySelector('input[name="option1"]').value;
+                const option2 = questionElement.querySelector('input[name="option2"]').value;
+                const option3 = questionElement.querySelector('input[name="option3"]').value;
+                const option4 = questionElement.querySelector('input[name="option4"]').value;
+                const correctOption = questionElement.querySelector('select[name="correctOption"]').value;
+
+                questions.push({
+                    questionText,
+                    options: [option1, option2, option3, option4],
+                    correctOption: correctOption
+                });
+            });
+
+            // Create the quiz object
+            const quizData = {
+                title,
+                category,
+                difficulty,
+                timeLimit,
+                questions
+            };
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/createQuiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(quizData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.message);
+                    document.getElementById('quizForm').reset();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while creating the quiz.');
+            }
+        });
+    </script>
+
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f7fb;
+            color: #333;
+        }
+
+        header {
+            background-color: #2d9cdb;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header .logo h1 {
+            font-size: 2.2rem;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: #2d9cdb;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .quiz-form {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 120px;
+        }
+
+        .question .options input {
+            width: 45%;
+            margin-right: 5%;
+        }
+
+        .question .correct-option {
+            margin-top: 10px;
+        }
+
+        .btn {
+            background-color: #2d9cdb;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #1c7bb9;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+        }
+
+        #addQuestion {
+            margin-top: 1rem;
+            display: inline-block;
+            font-size: 1.1rem;
+            background-color: #ddd;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #addQuestion:hover {
+            background-color: #bbb;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="userProfileStyle.css"> <!-- New style file for user profile -->
+    <style>
+        /* User Profile Page Styling */
+        body {
+            background-color: #f4f7fc;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #6097e2, #00509e);
+            color: white;
+            padding: 20px 50px;
+            position: sticky;
+            top: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header .logo h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        header .header-nav a {
+            color: white;
+            font-size: 1rem;
+            margin-left: 20px;
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        header .header-nav a:hover {
+            border-bottom: 2px solid white;
+        }
+
+        /* Main Container for Profile */
+        .main-container {
+            margin-top: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px; /* Set max-width for consistent layout */
+            margin: auto; /* Centers the content horizontally */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content h2 {
+            font-size: 2.5rem;
+            color: #0077c2;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: auto;
+            text-align: left;
+        }
+
+        .profile-info p {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 15px 0;
+        }
+
+        .profile-info p strong {
+            color: #0077c2;
+        }
+
+        /* Button Styling */
+        .profile-card button {
+            background-color: #0077c2;
+            color: #fff;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .profile-card button:hover {
+            background-color: #00509e;
+        }
+
+        /* Ensure Layout Consistency (No Responsive Adjustments) */
+        @media (max-width: 768px) {
+            header {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .profile-card {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .content h2 {
+                font-size: 2rem;
+            }
+
+            .profile-card button {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header with Logo and Menu Items -->
+    <header>
+        <div class="logo">
+            <a href="quiz.html"><h1>Quizeo</h1></a>
+        </div>
+        <nav class="header-nav">
+            <a href="quiz.html">Quizzes</a>
+            <a href="myquiz.html">My Quizzes</a>
+            <a href="#review">Review</a>
+            <a href="userProfile.html">My Profile</a>
+            <a href="index.html">Log Out</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <div class="content">
+            <h2>User Profile</h2>
+            <!-- User profile details will be displayed here -->
+            <div id="user-profile" class="profile-card">
+                <p>Loading user data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Retrieve the token from localStorage (or sessionStorage)
+        const token = localStorage.getItem('token');  // This should be set after login
+
+        // Check if token exists
+        if (!token) {
+            document.getElementById('user-profile').innerHTML = '<p>User is not logged in.</p>';
+        } else {
+            // Fetch user data from the server using the token
+            fetch('/api/userProfile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`  // Send the token in the Authorization header
+                }
+            })
+            .then(response => response.json())
+            .then(user => {
+                // Display user profile information
+                const profileDiv = document.getElementById('user-profile');
+                profileDiv.innerHTML = `
+                    <div class="profile-info">
+                        <p><strong>Name:</strong> ${user.name}</p>
+                        <p><strong>Name:</strong> ${user.surname}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>User ID:</strong> ${user._id}</p>
+                    </div>
+                    <button onclick="window.location.href='editProfile.html'">Edit Profile</button>
+                `;
+            })
+            .catch(error => {
+                console.error('Error fetching user profile:', error);
+                document.getElementById('user-profile').innerHTML = '<p>Failed to load user data. Please try again later.</p>';
+            });
+        }
+    </script>
+
+</body>
+</html>

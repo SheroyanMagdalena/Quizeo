@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Quiz - Quizeo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Your existing CSS styles here */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fb;
+            color: #333;
+        }
+
+        header {
+            background-color: #2d9cdb;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header .logo h1 {
+            font-size: 2.2rem;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header nav a {
+            color: white;
+            font-size: 1.1rem;
+            margin-left: 2.5rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        header nav a:hover {
+            color: #f0f0f0;
+        }
+
+        .main-container {
+            padding: 3rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: #2d9cdb;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        #quiz-details {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        #timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d9cdb;
+            margin-bottom: 2rem;
+        }
+
+        .question {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .question label {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .question input {
+            margin-right: 0.5rem;
+        }
+
+        #submit-quiz {
+            background-color: #2d9cdb;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-quiz:hover {
+            background-color: #1c7bb9;
+        }
+
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Timer Animation */
+        .timer-bar {
+            height: 15px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .timer-progress {
+            height: 100%;
+            background-color: #2d9cdb;
+            width: 100%;
+            border-radius: 10px;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with navigation links -->
+    <header>
+        <div class="logo">
+            <a href="quiz.html"><h1>Quizeo</h1></a>
+        </div>
+        <nav class="header-nav">
+            <a href="quiz.html">Quizzes</a>
+            <a href="myquiz.html">My Quizzes</a>
+            <a href="#review">Review</a>
+            <a href="userProfile.html">My Profile</a>
+            <a href="index.html">Log Out</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <h2>Start Quiz</h2>
+
+        <div id="quiz-details">
+            <!-- Quiz details (title, category, time limit) will be displayed here -->
+        </div>
+
+        <div id="timer">
+            Time Remaining: <span id="timer-display">00:00</span>
+        </div>
+        
+        <div class="timer-bar">
+            <div id="timer-progress" class="timer-progress"></div>
+        </div>
+
+        <div id="quiz-questions">
+            <!-- Quiz questions will be displayed here -->
+        </div>
+
+        <button id="submit-quiz" style="display: none;">Submit Quiz</button>
+    </div>
+
+    <script>
+        // Extract quiz ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizId = urlParams.get('id');  // Get the quiz ID from the URL
+
+        fetch(`/api/quizDetails?id=${quizId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`  // Send token in Authorization header
+            }
+        })
+        .then(response => response.json())
+        .then(quiz => {
+            if (quiz) {
+                // Display quiz details
+                const quizDetails = document.getElementById('quiz-details');
+                quizDetails.innerHTML = `<h3>${quiz.title}</h3><p><strong>Category:</strong> ${quiz.category}</p><p><strong>Time Limit:</strong> ${quiz.timeLimit} minutes</p>`;
+
+                // Display the quiz questions
+                const quizQuestions = document.getElementById('quiz-questions');
+                quiz.questions.forEach((question, index) => {
+                    const questionElement = document.createElement('div');
+                    questionElement.classList.add('question');
+
+                    questionElement.innerHTML = `
+                        <h4>Q${index + 1}: ${question.questionText}</h4>
+                        ${question.options.map((option, optionIndex) => `
+                            <label>
+                                <input type="radio" name="question${index}" value="${optionIndex}">
+                                ${option}
+                            </label><br>
+                        `).join('')}
+                    `;
+                    quizQuestions.appendChild(questionElement);
+                });
+
+                // Set up the timer
+                const timeLimit = quiz.timeLimit * 60;  // Convert to seconds
+                let timeRemaining = timeLimit;
+                const timerDisplay = document.getElementById('timer-display');
+                const timerProgress = document.getElementById('timer-progress');
+                const submitButton = document.getElementById('submit-quiz');
+                const timerInterval = setInterval(function() {
+                    timeRemaining--;
+                    const minutes = Math.floor(timeRemaining / 60);
+                    const seconds = timeRemaining % 60;
+                    timerDisplay.textContent = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+                    // Update the progress bar
+                    const percentage = (timeRemaining / timeLimit) * 100;
+                    timerProgress.style.width = percentage + '%';
+
+                    // When the time runs out, submit the quiz
+                    if (timeRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        submitQuiz();  // Automatically submit quiz when time runs out
+                    }
+                }, 1000);
+
+                // Show the submit button
+                submitButton.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching quiz details:', error);
+            document.getElementById('quiz-details').innerHTML = '<p>Failed to load quiz. Please try again later.</p>';
+        });
+
+        // Handle quiz submission
+        function submitQuiz() {
+            const answers = [];
+            const questions = document.querySelectorAll('.question');
+            questions.forEach((questionElement, questionIndex) => {
+                const selectedOption = questionElement.querySelector(`input[name="question${questionIndex}"]:checked`);
+                if (selectedOption) {
+                    answers.push(parseInt(selectedOption.value));  // Store the selected answer index
+                }
+            });
+
+            // Send the answers to the server for grading
+            fetch(`/api/submitQuiz`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`  // Send the token in the Authorization header
+                },
+                body: JSON.stringify({
+                    quizId: quizId,
+                    answers: answers
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert('Your score: ' + result.score);  // Show the score
+
+                // Grade the answers with color feedback
+                const questions = document.querySelectorAll('.question');
+                questions.forEach((questionElement, questionIndex) => {
+                    const selectedOption = questionElement.querySelector(`input[name="question${questionIndex}"]:checked`);
+                    const correctOption = result.correctAnswers[questionIndex];
+
+                    if (selectedOption) {
+                        if (parseInt(selectedOption.value) === correctOption) {
+                            selectedOption.parentElement.classList.add('correct');
+                        } else {
+                            selectedOption.parentElement.classList.add('incorrect');
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error submitting quiz:', error);
+                alert('Error submitting quiz.');
+            });
+        }
+
+        document.getElementById('submit-quiz').addEventListener('click', submitQuiz);
+
+    </script>
+
+</body>
+</html>

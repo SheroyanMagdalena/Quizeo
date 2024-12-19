@@ -1,0 +1,24 @@
+async function fetchQuizzes() {
+    try {
+        const response = await fetch('/api/quizzes');
+        const quizzes = await response.json();
+
+        const quizListElement = document.getElementById('quizList');
+        quizListElement.innerHTML = ''; 
+
+        quizzes.forEach(quiz => {
+            const quizElement = document.createElement('div');
+            quizElement.classList.add('quiz-item');
+            quizElement.innerHTML = `
+                <h3>${quiz.title}</h3>
+                <p><strong>Category:</strong> ${quiz.category}</p>
+                <p><strong>Difficulty:</strong> ${quiz.difficulty}</p>
+                <p><strong>Time Limit:</strong> ${quiz.timeLimit} minutes</p>
+                <button onclick="startQuiz(${quiz._id})">Start Quiz</button>
+            `;
+            quizListElement.appendChild(quizElement);
+        });
+    } catch (err) {
+        console.error('Error fetching quizzes:', err);
+    }
+}

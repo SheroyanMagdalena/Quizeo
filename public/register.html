@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        // Email validation function
+        function validateEmail() {
+            var email = document.getElementById('email').value;
+            var regex = /^[a-zA-Z0-9._%+-]+@etud\.ufar\.am$/;
+            if (!regex.test(email)) {
+                alert("Please use a valid email address with the domain @etud.ufar.am");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+        <!-- Header with navigation links -->
+        <header>
+            <div class="logo">
+                <a href="quiz.html"><h1 style="color: white;">Quizeo</h1></a>
+            </div>
+            <nav class="header-nav">
+                <a href="quiz.html">Quizzes</a>
+                <a href="myquiz.html">My Quizzes</a>
+                <a href="#review">Review</a>
+                <a href="userProfile.html">My Profile</a>
+                <a href="index.html">Log Out</a>
+            </nav>
+        </header>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 main">
+                <form action="/sign_up" method="POST" onsubmit="return validateEmail()">
+                    <h2>Registration Form</h2>
+                    
+                    <label for="name">First Name</label>
+                    <input type="text" class="box" id="name" name="name" placeholder="First Name" required />
+                    <br>
+
+                    <label for="surname">Surname</label>
+                    <input type="text" class="box" id="surname" name="surname" placeholder="Surname" required />
+                    <br>
+
+                    <label for="email">Email</label>
+                    <input type="email" class="box" id="email" name="email" placeholder="email@etud.ufar.am" required />
+                    <br>
+
+                    <label for="password">Password</label>
+                    <input type="password" class="box" id="password" name="password" placeholder="Password" required />
+                    <br>
+
+                    <input type="submit" value="Submit" id="submit" />
+                </form>
+                <p class="redirect">
+                    Already have an account? <a href="/login.html">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

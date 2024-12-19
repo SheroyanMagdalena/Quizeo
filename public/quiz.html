@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quizzes - Quizeo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+   <!-- Header with navigation links -->
+   <header>
+    <div class="logo">
+        <a href="quiz.html"><h1>Quizeo</h1></a>
+    </div>
+    <nav class="header-nav">
+        <a href="quiz.html">Quizzes</a>
+        <a href="myquiz.html">My Quizzes</a>
+        <a href="#review">Review</a>
+        <a href="userProfile.html">My Profile</a>
+        <a href="index.html">Log Out</a>
+
+    </nav>
+</header>
+
+   <!-- Create Quiz Container -->
+   <div class="create-quiz-container">
+       <h3>Create a New Quiz</h3>
+       <p>Want to create your own quiz? Click below to get started.</p>
+       <a href="createquiz.html" class="create-quiz-btn">Create Quiz</a>
+   </div>
+
+    <div class="main-container">
+        <h2>The Quizzes</h2>
+        <div id="quiz-list" class="quiz-list-container"></div>
+    </div>
+
+    <script>
+        // Fetch quizzes from the /api/thequiz endpoint
+        fetch('/api/thequiz', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`  // Send the token for authentication
+            }
+        })
+            .then(response => response.json())
+            .then(quizzes => {
+                const quizList = document.getElementById('quiz-list');
+
+                if (quizzes.length === 0) {
+                    quizList.innerHTML = '<p>No quizzes available.</p>';
+                    return;
+                }
+
+                quizzes.forEach(quiz => {
+                    // Create a container for each quiz
+                    const quizElement = document.createElement('div');
+                    quizElement.classList.add('quiz-card');
+
+                    // Add quiz details to the element
+                    quizElement.innerHTML = `
+                        <div class="quiz-card-header">
+                            <h3>${quiz.title}</h3>
+                        </div>
+                        <div class="quiz-card-body">
+                            <p><strong>Questions:</strong> ${quiz.questions.length}</p>
+                            <p><strong>Category:</strong> ${quiz.category}</p>
+                            <p><strong>Difficulty:</strong> ${quiz.difficulty}</p>
+                            <p><strong>Time Limit:</strong> ${quiz.timeLimit} minutes</p>
+                        </div>
+                        <div class="quiz-card-footer">
+                            <button onclick="startQuiz('${quiz._id}')">Start Quiz</button>
+                        </div>
+                    `;
+
+                    // Append the quiz element to the quiz list
+                    quizList.appendChild(quizElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching quizzes:', error);
+                document.getElementById('quiz-list').innerHTML = '<p>Failed to load quizzes. Please try again later.</p>';
+            });
+
+        // Function to handle starting the quiz (could redirect to a new page or show questions)
+        function startQuiz(quizId) {
+            window.location.href = `/quizStart.html?id=${quizId}`;
+        }
+    </script>
+
+   <style>
+    /* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f7fb;
+    color: #333;
+}
+
+header {
+    background-color: #2d9cdb;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+header .logo h1 {
+    font-size: 2.2rem;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+header nav a {
+    color: white;
+    font-size: 1.1rem;
+    margin-left: 2.5rem;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+header nav a:hover {
+    color: #f0f0f0;
+}
+
+.main-container {
+    padding: 3rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h2 {
+    font-size: 2.8rem;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+    color: #2d9cdb;
+}
+
+.quiz-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 2rem;
+    padding-top: 2rem;
+}
+
+.quiz-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-card-header {
+    background-color: #2d9cdb;
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+.quiz-card-body {
+    padding: 1.5rem;
+}
+
+.quiz-card-body p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.quiz-card-footer {
+    padding: 1.2rem;
+    text-align: center;
+    background-color: #f1f3f8;
+}
+
+.quiz-card-footer button {
+    background-color: #2d9cdb;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.quiz-card-footer button:hover {
+    background-color: #1c7bb9;
+}
+
+/* Create Quiz Container */
+.create-quiz-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.create-quiz-container h3 {
+    font-size: 2rem;
+    color: #2d9cdb;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.create-quiz-container p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #555;
+}
+
+.create-quiz-btn {
+    background-color: #2d9cdb;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background-color 0.3s;
+}
+
+.create-quiz-btn:hover {
+    background-color: #1c7bb9;
+}
+   </style>
+
+</body>
+</html>
